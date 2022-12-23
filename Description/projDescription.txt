@@ -1,0 +1,22 @@
+The project called for submission is called Nautilius, named by The Nautilius in the Book of 《Twenty Thousand Leagues Under the Sea》. For this project was designed to record the routes and main positions in this book. The idea of this project is to help us read and understand this book and the address it mentioned more clearly, with every chapter singed on the planet as detailed as possible. The development of this project was performed by myself.
+
+This book depicts a wonderful underwater trip, it is intresting. For better effect, this project uses some code in shadertoy(www.shadertoy.com), thanks .
+
+The main functions in this project are as following:
+Use Mapbox as its imageryprovider, and it always show total route.
+[diagram 1]
+
+Map selecting, Nautilius provide longitude/latitude lines show map, ocean current show map, rainripple show map ,and time show map ,every can be toggle visible/insible. The toggle button in the right panel.
+[diagram2]
+
+Time show:when it is visible, a labelcollection primitive is displayed, in order to make it visible all the time, it ignore the depth test, and the project use a ray test in scene preupdate listener to make it invisible when on the other side of the globe.
+[diagram3]
+
+Ocean Current Show:when it is visible, show the global ocean current, for the book often write about the current, this project contains three type of current:warm current(use red color),cold current(use blue color),and moonsoon current(in the Indian Ocean,use purple color,it will change directions),every current use diffent color and text to sign its type and name, I use new Material function in Cesium to complete this.
+[diagram4]
+
+Longitude/Latitude line Show:It demonstrate the Longitude/Latitude line on the globe, It use entitys.
+[diagram5]
+
+Measusing, Nautilius provide Location get ,distance measure,height measure,square measure. Left click every button and then left click the earth, right click is the end of the measuring. The buttons is in the right top panel.
+
