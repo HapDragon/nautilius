@@ -1,14 +1,18 @@
 import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
-import cesium from 'vite-plugin-cesium'; // 引入插件
+// import cesium from 'vite-plugin-cesium'; // 引入插件
 import autoImport from "unplugin-auto-import/vite";
 import autoprefixer from "autoprefixer";
 import postcsspxtoviewport from "postcss-px-to-viewport";
 
+import externalGlobals from "rollup-plugin-external-globals";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [vue(), cesium(),
+    plugins: [
+        vue(),
+        // cesium(),
+
         autoImport({
             imports: [
                 "vue",
@@ -45,6 +49,17 @@ export default defineConfig({
                     landscape: false, // 是否处理横屏情况
                     landscapeUnit: "vw", //横屏时使用的单位
                     landscapeWidth: 1920, //横屏时使用的视口宽度
+                }),
+            ],
+        },
+    },
+    build: {
+        rollupOptions: {
+            external: ["Cesium"],
+            plugins: [
+                // commonjs(),
+                externalGlobals({
+                    Cesium: "Cesium"
                 }),
             ],
         },

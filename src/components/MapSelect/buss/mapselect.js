@@ -5,8 +5,9 @@
  */
 import Bus from "../../../buss/Bus";
 import cesiumviewer from "../../../buss/cesiumviewer";
-import * as Cesium from 'cesium/Build/Cesium';
-import {oceanCurrentPoints_C,routePoints_C} from '../../../assets/pointlines'
+import coordinate from '../../../buss/Coordinates'
+// import * as Cesium from 'cesium/Build/Cesium';
+import {oceanCurrentPoints_C, routePoints_C} from '../../../assets/pointlines'
 
 import {CreateFlowMaterial, CreateFlowWithTextMaterial} from '../../../buss/UsefulMaterial'
 
@@ -241,16 +242,16 @@ export function ToggleRainDropShow(visible) {
 
         let strindex = viewer.scene.globe._surfaceShaderSet.baseFragmentShaderSource.sources[sourceIndex].indexOf('vec4 sampleAndBlend(');
         ToggleRainDropShow.rainglobalfs = ToggleRainDropShow.originglobalfs.substr(0, strindex) + GlobeFS + ToggleRainDropShow.originglobalfs.substr(strindex);
-        ToggleRainDropShow.rainglobalfs =ToggleRainDropShow.rainglobalfs .replace('vec4 value = texture2D(textureToSample, textureCoordinates);\nvec3 color = value.rgb;\nfloat alpha = value.a;',
+        ToggleRainDropShow.rainglobalfs = ToggleRainDropShow.rainglobalfs.replace('vec4 value = texture2D(textureToSample, textureCoordinates);\nvec3 color = value.rgb;\nfloat alpha = value.a;',
             'vec3 color=getrainsplitcolor(textureToSample,textureCoordinates); \nfloat alpha = textureAlpha;');
 
     }
     //it now can be activated immediately
-    viewer.scene.globe._material=visible===false?undefined:new Cesium.Material({
-        fabric : {
-            type : 'Color',
-            uniforms : {
-                color : new Cesium.Color(0.0, 0.0, 0.0, 0.0)
+    viewer.scene.globe._material = visible === false ? undefined : new Cesium.Material({
+        fabric: {
+            type: 'Color',
+            uniforms: {
+                color: new Cesium.Color(0.0, 0.0, 0.0, 0.0)
             }
         }
     });
@@ -260,46 +261,181 @@ export function ToggleRainDropShow(visible) {
 }
 
 export function ToggleTimeShow(visible) {
-    if(ToggleTimeShow.prim==undefined){
+    if (ToggleTimeShow.prim == undefined) {
         const viewer = cesiumviewer.CesiumViewer.getInstance().viewer;
         if (viewer == undefined) return;
-        const scene=viewer.scene;
+        const scene = viewer.scene;
 
         ToggleTimeShow.prim = scene.primitives.add(new Cesium.LabelCollection());
         routePoints_C.forEach(
             item => {
                 if (item.time != undefined) {
-                    let time=new Date(item.time);
+                    let time = new Date(item.time);
                     ToggleTimeShow.prim.add({
-                        position : Cesium.Cartesian3.fromDegrees(item.position[0],item.position[1]),
-                        font : '12px sans-serif',
-                        showBackground : true,
-                        disableDepthTestDistance:Number.POSITIVE_INFINITY,
-                        verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
-                        text : `${time.getFullYear()}/${time.getMonth()+1}/${time.getDate()} ${time.getHours()} o'clock`
+                        position: Cesium.Cartesian3.fromDegrees(item.position[0], item.position[1]),
+                        font: '12px sans-serif',
+                        showBackground: true,
+                        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                        text: `${time.getFullYear()}/${time.getMonth() + 1}/${time.getDate()} ${time.getHours()} o'clock`
                     });
 
                 }
             }
         );
         //when billboards is in the backforward of the earth make it invisible
-        var updatelabelvisible=function(){
-            let origin=scene.camera.position;
-            let dir=new Cesium.Cartesian3();
-            ToggleTimeShow.prim._labels.forEach(item=>{
-                Cesium.Cartesian3.subtract(item._position,origin,dir);
-                let length=Cesium.Cartesian3.magnitude(dir);
-                let ray=new Cesium.Ray(origin,dir);
-                let intersct=Cesium.IntersectionTests.rayEllipsoid(ray,scene.globe.ellipsoid);
-                if(intersct==null||intersct.start==null) {
-                    item.show=false;
+        var updatelabelvisible = function () {
+            let origin = scene.camera.position;
+            let dir = new Cesium.Cartesian3();
+            ToggleTimeShow.prim._labels.forEach(item => {
+                Cesium.Cartesian3.subtract(item._position, origin, dir);
+                let length = Cesium.Cartesian3.magnitude(dir);
+                let ray = new Cesium.Ray(origin, dir);
+                let intersct = Cesium.IntersectionTests.rayEllipsoid(ray, scene.globe.ellipsoid);
+                if (intersct == null || intersct.start == null) {
+                    item.show = false;
                     return;
                 }
-                item.show=Math.abs(intersct.start-length)<100&&ToggleTimeShow.prim.show;
+                item.show = Math.abs(intersct.start - length) < 100 && ToggleTimeShow.prim.show;
             })
         }
         scene.preUpdate.addEventListener(updatelabelvisible);
     }
-    ToggleTimeShow.prim.show=visible;
+    ToggleTimeShow.prim.show = visible;
 
+}
+
+
+export function ToggleDepthWMShow(visible) {
+    if (cesiumviewer.CesiumViewer.getInstance().depthimagery == null) return;
+
+    cesiumviewer.CesiumViewer.getInstance().depthimagery.show = visible;
+    if (visible === true) {
+        viewer.imageryLayers.raiseToTop(cesiumviewer.CesiumViewer.getInstance().depthimagery);
+    }
+}
+
+export function ToggleUnderSeaFeatureShow(visible) {
+    if (cesiumviewer.CesiumViewer.getInstance().underseafeatureimagery == null) return;
+
+    cesiumviewer.CesiumViewer.getInstance().underseafeatureimagery.show = visible;
+    if (visible === true) {
+        viewer.imageryLayers.raiseToTop(cesiumviewer.CesiumViewer.getInstance().underseafeatureimagery);
+    }
+}
+
+export function ToggleOceanWaterShow(visible) {
+    if (ToggleOceanWaterShow.waterprim == null) {
+        const viewer = cesiumviewer.CesiumViewer.getInstance().viewer;
+        if (viewer == undefined) return;
+        const scene=viewer.scene;
+        ToggleOceanWaterShow.waterprim = scene.primitives.add(new Cesium.GroundPrimitive({
+            geometryInstances: new Cesium.GeometryInstance({
+                geometry: new Cesium.RectangleGeometry({
+                    rectangle: Cesium.Rectangle.fromDegrees(-180.0, -90.0, 180.0, 90.0),
+                    vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT,
+                    height: 0,
+                    extrudedHeight: 1,
+                    // shadowVolume: true,
+                })
+                // geometry: Cesium.RectangleGeometry.createShadowVolume(new Cesium.RectangleGeometry({
+                //         rectangle: Cesium.Rectangle.fromDegrees(-180.0, -90.0, 180.0, 90.0),
+                //         vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT,
+                //         height: 0,
+                //         // extrudedHeight: 10
+                //     }), function () {
+                //         return -10000
+                //     },
+                //     function () {
+                //         return 10000;
+                //     }),
+            }),
+            appearance: new Cesium.EllipsoidSurfaceAppearance({
+                // flat:true,
+                material: new Cesium.Material({
+                    fabric: {
+                        // type: "Water",
+                        uniforms: {
+                            baseWaterColor: new Cesium.Color(64 / 255.0, 127 / 255.0, 253 / 255.0, 0.1),
+                            blendColor: new Cesium.Color(64 / 255.0, 157 / 255.0, 253 / 255.0, 0.1),
+                            specularMap: '/images/cesium/earthspec1k.jpg',
+                            normalMap: '/images/cesium/waterNormals.jpg',
+                            frequency: 1000.0,
+                            animationSpeed: 0.02,
+                            amplitude: 10,
+                            specularIntensity: 5,
+                            fadeFactor: 1.0,
+                        },
+                        source: `
+                        // Thanks for the contribution Jonas
+// http://29a.ch/2012/7/19/webgl-terrain-rendering-water-fog
+
+uniform sampler2D specularMap;
+uniform sampler2D normalMap;
+uniform vec4 baseWaterColor;
+uniform vec4 blendColor;
+uniform float frequency;
+uniform float animationSpeed;
+uniform float amplitude;
+uniform float specularIntensity;
+uniform float fadeFactor;
+
+czm_material czm_getMaterial(czm_materialInput materialInput)
+{
+    czm_material material = czm_getDefaultMaterial(materialInput);
+
+    float time = czm_frameNumber * animationSpeed;
+
+    // fade is a function of the distance from the fragment and the frequency of the waves
+    float fade = max(1.0, (length(materialInput.positionToEyeEC) / 1000000.0) * frequency * fadeFactor);
+
+    float specularMapValue = texture2D(specularMap, materialInput.st).r;
+
+    // note: not using directional motion at this time, just set the angle to 0.0;
+    vec4 noise = czm_getWaterNoise(normalMap, materialInput.st * frequency, time, 0.0);
+    vec3 normalTangentSpace = noise.xyz * vec3(1.0, 1.0, (1.0 / amplitude));
+
+    // fade out the normal perturbation as we move further from the water surface
+    normalTangentSpace.xy /= fade;
+
+    // attempt to fade out the normal perturbation as we approach non water areas (low specular map value)
+    normalTangentSpace = mix(vec3(0.0, 0.0, 50.0), normalTangentSpace, specularMapValue);
+
+    normalTangentSpace = normalize(normalTangentSpace);
+
+    // get ratios for alignment of the new normal vector with a vector perpendicular to the tangent plane
+    float tsPerturbationRatio = clamp(dot(normalTangentSpace, vec3(0.0, 0.0, 1.0)), 0.0, 1.0);
+
+    // fade out water effect as specular map value decreases
+    material.alpha = mix(blendColor.a, baseWaterColor.a, specularMapValue) * specularMapValue;
+
+
+    // base color is a blend of the water and non-water color based on the value from the specular map
+    // may need a uniform blend factor to better control this
+    material.diffuse = mix(blendColor.rgb, baseWaterColor.rgb, specularMapValue);
+
+    // diffuse highlights are based on how perturbed the normal is
+    material.diffuse += (0.1 * tsPerturbationRatio);
+
+    material.diffuse = material.diffuse;
+
+    material.normal = normalize(materialInput.tangentToEyeMatrix * normalTangentSpace);
+
+    material.specular = specularIntensity;
+    material.shininess = 10.0;
+
+    return material;
+}
+
+                        `
+                    },
+                }),
+                aboveGround: true,
+            }),
+            show: true,
+            // debugShowBoundingVolume:true,
+            debugShowShadowVolume: true,
+        }));
+    }
+    ToggleOceanWaterShow.waterprim.show=visible;
 }

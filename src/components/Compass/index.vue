@@ -4,7 +4,7 @@
 	import cesiumviewer from "../../buss/cesiumviewer";
 	// import commonfuncs from '@/utils/cesium/commonfuncs'
 	import coordinates from '../../buss/Coordinates';
-	import * as Cesium from 'cesium/Build/Cesium';
+	// import * as Cesium from 'cesium/Build/Cesium';
 
 
 	const northtin = ref(null);

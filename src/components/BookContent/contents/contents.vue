@@ -36,7 +36,7 @@
 
                         <input type="checkbox" :checked="subitem.checked" @click="clickshowmap(item,subitem,index,subindex)"
                                class="verticalalign-texttop" title="Show on earth"/>
-                        <span>{{(index+1).toString()+"-"+(subindex+1).toString()}}{{getsubtitle(subitem.label,32)}}</span>
+                        <span>{{(index+1).toString()+"-"+(subindex+1).toString()}}{{getsubtitle(subitem.label,30)}}</span>
                         <img :src="bookinterimgsrc" title="enter to read" @click="$emit('readbookinter',index,subindex)">
                     </h4>
                 </h3>

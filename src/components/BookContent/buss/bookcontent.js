@@ -8,7 +8,7 @@ import {MotionType, routePoints_C} from '../../../assets/pointlines'
 import cesiumviewer from "../../../buss/cesiumviewer";
 
 import {CreateCircleWaveMaterial, CreateGlowMaterial} from '../../../buss/UsefulMaterial'
-import * as Cesium from 'cesium/Build/Cesium';
+// import * as Cesium from 'cesium/Build/Cesium';
 
 const keymapdata=new Map();
 

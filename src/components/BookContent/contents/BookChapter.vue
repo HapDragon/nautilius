@@ -18,8 +18,9 @@
             <div class="interval"></div>
         </div>
         <div id="content">
-            <embed class="containerHole"
-                   :src="'https://books-library.net/files/books-library.online-12201129Vw2E1.pdf'+(page==undefined?'':'#page='+page)" type="application/pdf"/>
+          <embed class="containerHole"
+                   :src="'/books-library.online-12201129Vw2E1.pdf'+(page==undefined?'':'#page='+page)" type="application/pdf"/>
+
         </div>
         <div id="footer">
             <div class="interval">
@@ -37,6 +38,7 @@
 
 
     const props = defineProps(['page']);
+
 
 
 </script>

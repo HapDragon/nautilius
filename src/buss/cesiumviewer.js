@@ -1,10 +1,74 @@
 
-import 'cesium/Build/Cesium/Widgets/widgets.css';
-import * as Cesium from 'cesium/Build/Cesium';
+// import 'cesium/Build/Cesium/Widgets/widgets.css';
+// import * as Cesium from 'cesium/Build/Cesium';
 
 import Bus from "./Bus.js";
 import coordinates from "./Coordinates";
 
+function addMapBoxImagery(imagerylayers) {
+	if(imagerylayers==null) return;
+	return imagerylayers.addImageryProvider(new Cesium.MapboxStyleImageryProvider({
+		// styleId: 'streets-v12',
+		// styleId: 'light-v11',
+		// styleId: 'dark-v11',
+		styleId: 'satellite-streets-v12',
+		// styleId: 'navigation-night-v1',
+		accessToken: 'pk.eyJ1Ijoid2FuZ3FpdXlhbiIsImEiOiJjbGJ2bTRhOTQwNTl4M25wcTgwcDZpZ3RzIn0.oiUc1hCNxVEVJbgKKKfRRQ'
+	}));
+}
+function addDepthImagery(imagerylayers) {
+	if(imagerylayers==null) return;
+	return imagerylayers.addImageryProvider(new Cesium.WebMapServiceImageryProvider({
+		url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv',
+		//https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?request=getmap&service=wms&BBOX=-90,-180,90,360&crs=EPSG:4326&format=image/jpeg&layers=gebco_latest_sub_ice_topo&width=1200&height=600&version=1.3.0
+		parameters: {
+			service: 'WMS',
+			format: 'image/png',
+			transparent: true,
+			crs: "EPSG:4326"
+
+		},
+		// layers:["GEBCO_LATEST_TID_2","GEBCO_LATEST_2_sub_ice_topo",'gebco_latest_sub_ice_topo'],
+		// layers:"GEBCO_LATEST_2",
+		// layers:"GEBCO_LATEST_TID",
+		// layers:"GEBCO_LATEST_2",
+		layers: "GEBCO_LATEST_2_sub_ice_topo",//可查询 显示高度
+		// layers : 'gebco_latest_sub_ice_topo',
+		// getFeatureInfoFormats: [
+		//     new Cesium.GetFeatureInfoFormat("html", null, function (html) {
+		//
+		//     })
+		// ]
+	}))
+}
+
+function addUnderSeaFeatures(imagerylayers) {
+	if(imagerylayers==null) return;
+	return imagerylayers.addImageryProvider(new Cesium.ArcGisMapServerImageryProvider({
+		// url: 'https://gis.ngdc.noaa.gov/arcgis/services/IHO/undersea_features/MapServer',
+		   url: "https://gis.ngdc.noaa.gov/arcgis/rest/services/IHO/undersea_features/MapServer"
+		// url : 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+		//https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?request=getmap&service=wms&BBOX=-90,-180,90,360&crs=EPSG:4326&format=image/jpeg&layers=gebco_latest_sub_ice_topo&width=1200&height=600&version=1.3.0
+		// parameters: {
+		// 	service: 'WMS',
+		// 	format: 'image/png',
+		// 	// transparent: true,
+		// 	crs: "EPSG:4326"
+		//
+		// },
+		// layers:["GEBCO_LATEST_TID_2","GEBCO_LATEST_2_sub_ice_topo",'gebco_latest_sub_ice_topo'],
+		// layers:"GEBCO_LATEST_2",
+		// layers:"GEBCO_LATEST_TID",
+		// layers:"GEBCO_LATEST_2",
+		// layers: ["Point Features","Line Features","Polygon Features"],//可查询
+		// layers : 'gebco_latest_sub_ice_topo',
+		// getFeatureInfoFormats: [
+		//     new Cesium.GetFeatureInfoFormat("html", null, function (html) {
+		//
+		//     })
+		// ]
+	}))
+}
 
 class CesiumViewer {
 	static getInstance() {
@@ -28,22 +92,29 @@ class CesiumViewer {
 
 		this.viewer = new Cesium.Viewer(id, options);
 
-		// var GridImagery = new Cesium.GridImageryProvider();
+		this.viewer.terrainProvider = Cesium.createWorldTerrain(
+			{
+				requestVertexNormals:true,
+				requestWaterMask : true,
+
+			}
+		);
+
 		var imageryLayers = this.viewer.imageryLayers;
+		// var GridImagery = new Cesium.GridImageryProvider();
 		// 		// var GridImageryLayer = imageryLayers.addImageryProvider(GridImagery); // 添加网格图层
 		// 		// imageryLayers.raiseToTop(GridImageryLayer); // 将网格图层置顶
 		// 		// var tilecoordinates = new Cesium.TileCoordinatesImageryProvider();
 		// 		// var tilecoordinatesLayer = this.viewer.imageryLayers.addImageryProvider(tilecoordinates);
 		// 		// imageryLayers.raiseToTop(tilecoordinatesLayer);
 
-		imageryLayers.addImageryProvider(new Cesium.MapboxStyleImageryProvider({
-			// styleId: 'streets-v12',
-			// styleId: 'light-v11',
-			// styleId: 'dark-v11',
-			styleId: 'satellite-streets-v12',
-			// styleId: 'navigation-night-v1',
-			accessToken: 'pk.eyJ1Ijoid2FuZ3FpdXlhbiIsImEiOiJjbGJ2bTRhOTQwNTl4M25wcTgwcDZpZ3RzIn0.oiUc1hCNxVEVJbgKKKfRRQ'
-		}));
+		this.mapboximagery=addMapBoxImagery(imageryLayers);
+		this.depthimagery=addDepthImagery(imageryLayers);
+		this.depthimagery.show=false;
+		this.underseafeatureimagery=addUnderSeaFeatures(imageryLayers);
+		this.underseafeatureimagery.show=false;
+
+
 
 		Bus.VM.$emit(Bus.SignalType.Scene_Init_Finish,that.viewer);
 
@@ -104,7 +175,6 @@ class CesiumViewer {
 			id: id,
 		});
 	}
-
 
 
 
@@ -545,6 +615,26 @@ class CesiumViewer {
 		} else {
 			throw "无法定位初始位置，缺少x,y参数";
 		}
+	}
+
+
+}
+
+export function FormatLongitude(longitude) {
+	if(longitude<0){
+		return Math.abs(longitude)+"°W";
+	}
+	else{
+		return longitude+"°E";
+	}
+}
+
+export function FormatLatitude(latitude) {
+	if(latitude<0){
+		return Math.abs(latitude)+"°S"
+	}
+	else{
+		return latitude+"°N"
 	}
 }
 

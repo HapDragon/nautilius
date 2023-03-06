@@ -3,7 +3,7 @@
  * Date 2022/11/29 14:21
  * Description
  */
-import * as Cesium from 'cesium/Build/Cesium';
+// import * as Cesium from 'cesium/Build/Cesium';
 
 
 export function CreateGlowMaterial(colormiddle,colorside,repeat) {

@@ -112,7 +112,9 @@ button:focus-visible {
 .position-fixed{
   position:fixed;
 }
-
+.float-left{
+  float:left;
+}
 /*自定义竖滚动栏样式-不显示*/
 .invisible_scrollheight{
   overflow-y: hidden;

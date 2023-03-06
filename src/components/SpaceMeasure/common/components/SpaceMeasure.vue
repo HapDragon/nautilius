@@ -11,6 +11,8 @@
                  :src="(subcurTool&&subcurTool.name==item.name)?item.selectedimgurl:item.imgurl"
                  :title="item.label"
                  @click="clicksubmenu(item)">
+
+            <img :src=clearimgurl style="width:12px;height:12px;margin:9px 11px;" @click="clearmeasures"/>
         </div>
 
 
@@ -37,8 +39,9 @@
     import Bus from '../../../../buss/Bus'
     import cesiumUtil from '../../../../buss/cesiumviewer'
     import Coordinates from '../../../../buss/Coordinates'
-    import * as Cesium from 'cesium/Build/Cesium';
+    // import * as Cesium from 'cesium/Build/Cesium';
     import getlocation from './GetLocation.vue'
+    import {ToggleEnableDepthMeasure} from '../../../ThematicMeasure/buss/thematicmeasure'
 
 
     const ENTITYPRE='SPACEMEASURE'
@@ -53,7 +56,7 @@
 		data() {
 			return {
                 subcurTool: null,
-
+                clearimgurl:new URL(`../../assets/close.svg`, import.meta.url).href,
                 subtools:[
                     {name: "distance", label:"Distance Measure",
                         selectedimgurl:new URL(`../../assets/distanceMeasure_select.svg`, import.meta.url).href,
@@ -174,7 +177,7 @@
                         id: that.MeasureLocationEntityId + "poi",
                         position: Cesium.Cartesian3.fromDegrees(pos.longitude, pos.latitude, pos.height),
                         billboard: {
-                            image: '/images/cesium/SpaceMeasure/getlocationmap.png',
+                            image: '/images/cesium/getlocationmap.png',
                             width: 25,
                             height: 25,
                             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
@@ -186,6 +189,10 @@
                     // that.locationLeftClick(pos);
                 }
             })
+
+            Bus.VM.$on(Bus.SignalType.CLEARMEASURES,function () {
+                that.MeasureClear()
+            });
 
             // 距离、面积、高度量测
             Bus.VM.$on("Scene_Mouse_Left_Click", function (movement) {
@@ -263,10 +270,16 @@
                 if (that.DistancePois.length > 0) that.HandleDistanceSceneCameraMove();
                 if (that.SquarePois.length > 0) that.HandleSquareSceneCameraMove();
             };
+            Bus.VM.$on(Bus.SignalType.Scene_Init_Finish,function (viewer) {
+                cesiumUtil.CesiumViewer.getInstance().AddPostRenderEventListener(that.CesiumPostRenderLister);
+            })
+
 		},
 		methods: {
 
-
+            clearmeasures(){
+                this.MeasureClear();
+            },
             HiddenMenu(){
                 $("#SpaceMeasure .SubMainFrame").css('display', 'none');
                 $("#SpaceMeasure .SubMainFrame").css('height', '0px');
@@ -577,6 +590,7 @@
                 this.subcurTool = subitem;
                 if(typeof this[subitem.method] === "function"){
                     this[subitem.method]();
+                    Bus.VM.$emit(Bus.SignalType.CLEARTHEMATICMEASURES);
                 }
             },
             clearanasubmenus(){
@@ -594,7 +608,7 @@
         background: #122134cc;
         width: 34px;
         /*height: 268px;*/
-        height:0px;
+        height:188px;
         top: 100px;
         right: 22px;
     }

@@ -1,4 +1,4 @@
-import * as Cesium from 'cesium/Build/Cesium';
+// import * as Cesium from 'cesium/Build/Cesium';
 //WGS84坐标系
 function CoordinateWGS84(longitude,latitude,height) {
     this.longitude=longitude;
@@ -229,8 +229,108 @@ CoordinateLocal.GetDistancePlane=function (localpoi1,localpoi2) {
     return Math.sqrt(dx*dx+dy*dy);
 }
 
+function GetCartesianDisplane(cartesian1,cartesian2) {
+    let wgs1=CoordinateWGS84.fromCatesian(cartesian1);
+    let wgs2=CoordinateWGS84.fromCatesian(cartesian2);
+    return CoordinateWGS84.GetDistancePlane(wgs1,wgs2);
+}
+
+function GetDislen(cartesianlist) {
+    let lens=[];
+    let totallens=[];
+    let totallen=0;
+
+    for(let i=0;i<cartesianlist.length-1;i++){
+        lens.push(Cesium.Cartesian3.distance(cartesianlist[i], cartesianlist[i+1]));
+        totallen+=lens[i];
+        totallens.push(totallen);
+    }
+    return {
+        DisLens:lens,
+        TotalDisLens:totallens,
+        TotalDis:totallen,
+        TotalLerpDis:totallens.map(item=>{
+            return item/totallen
+        }),
+        LerpDis:lens.map(item=>{
+            return item/totallen
+        })
+    }
+}
+
+function GetCartesianByLerpWithDis(cartesianlist,lerp,dislens) {
+    // let curtotallerp=0;
+    let result={};
+    for(let i=0;i<dislens.TotalLerpDis.length;i++){
+        const curlerp=dislens.LerpDis[i];
+        const nexttotallerp=dislens.TotalLerpDis[i];
+        const curtotallerp=nexttotallerp-curlerp;
+
+        if(curtotallerp==lerp){
+            result.cartesian=cartesianlist[i]
+            result.dis=dislens.TotalDisLens[i]-dislens.DisLens[i]
+            break;
+        }
+
+        if(nexttotallerp==lerp){
+            result.cartesian=cartesianlist[i+1]
+            result.dis=dislens.TotalDisLens[i]
+            break;
+        }
+
+        if(nexttotallerp>=lerp)
+        {
+            let jisuanlerp=lerp-curtotallerp;
+            jisuanlerp=jisuanlerp/curlerp;
+            result.cartesian=Cesium.Cartesian3.lerp(cartesianlist[i],cartesianlist[i+1],jisuanlerp,new Cesium.Cartesian3())
+            result.dis=dislens.TotalDisLens[i]-dislens.DisLens[i]+GetCartesianDisplane(result.cartesian,cartesianlist[i]);
+            break;
+        }
+    }
+    if(result.dis==undefined){
+        result.cartesian=cartesianlist[cartesianlist.length-1]
+        result.dis=dislens.TotalDis;
+    }
+    return result;
+
+}
+
+function GetCartesianBylerp(cartesianlist,lerp) {
+    let lens=[];
+    let totallen=0;
+
+    for(let i=0;i<cartesianlist.length-1;i++){
+        lens.push(Cesium.Cartesian3.distance(cartesianlist[i], cartesianlist[i+1]));
+        totallen+=lens[i];
+    }
+
+
+    let curtotallerp=0;
+    for(let i=0;i<lens.length;i++){
+        if(curtotallerp==lerp) return cartesianlist[i];
+        const curlerp=lens[i]/totallen;
+        const nexttotallerp=curtotallerp+curlerp;
+        if(nexttotallerp==lerp)
+            return cartesianlist[i+1];
+        if(nexttotallerp<lerp)
+        {
+            curtotallerp+=curlerp;
+        }
+        else{
+            let jisuanlerp=lerp-curtotallerp;
+            jisuanlerp=jisuanlerp/curlerp;
+            return Cesium.Cartesian3.lerp(cartesianlist[i],cartesianlist[i+1],jisuanlerp,new Cesium.Cartesian3())
+        }
+    }
+    return cartesianlist[cartesianlist.length-1];
+}
+
 export default {
     CoordinateWGS84,//WGS84坐标系
     CoordinateMercator,//墨卡托坐标系
     CoordinateLocal,//本地坐标系
+    GetCartesianBylerp,
+    GetDislen,
+    GetCartesianByLerpWithDis,
+    GetCartesianDisplane
 }

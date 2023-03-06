@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-    import {ToggleLonLatMapShow,ToggleOceanCurrentShow,ToggleRainDropShow,ToggleTimeShow} from './buss/mapselect'
+    import {ToggleLonLatMapShow,ToggleOceanCurrentShow,ToggleRainDropShow,ToggleTimeShow,ToggleDepthWMShow,ToggleOceanWaterShow,ToggleUnderSeaFeatureShow} from './buss/mapselect'
     const MapList=ref([
         {
             name:"longitude and latitude",
@@ -64,25 +64,44 @@
 
             }
         },
+        {
+            name:"Depth WMS",
+            show:false,
+            visibleimgurl:new URL(`./assets/depth_selected.jpg`, import.meta.url).href,
+            invisibleimgurl:new URL(`./assets/depth.jpg`, import.meta.url).href,
+            onclick:function () {
+                this.show=!this.show;
+                ToggleDepthWMShow(this.show)
+                // ToggleLonLatMapShow(this.show);
+
+            }
+        },
+        {
+            name:"Ocean Water",
+            show:false,
+            visibleimgurl:new URL(`./assets/oceanwater_selected.jpg`, import.meta.url).href,
+            invisibleimgurl:new URL(`./assets/oceanwater.jpg`, import.meta.url).href,
+            onclick:function () {
+                this.show=!this.show;
+                ToggleOceanWaterShow(this.show)
+                // ToggleLonLatMapShow(this.show);
+
+            }
+        },
+        {
+            name:"UnderseaFeature",
+            show:false,
+            visibleimgurl:new URL(`./assets/underseaname_selected.svg`, import.meta.url).href,
+            invisibleimgurl:new URL(`./assets/underseaname.svg`, import.meta.url).href,
+            onclick:function () {
+                this.show=!this.show;
+                ToggleUnderSeaFeatureShow(this.show)
+                // ToggleLonLatMapShow(this.show);
+
+            }
+        },
     ])
-    // const Maplist = reactive({
-    //
-    //     t1:true,
-    //     tc1:new URL(`./assets/lonlat.svg`, import.meta.url).href,
-    //     ta1:new URL(`./assets/lonlatselected.svg`, import.meta.url).href,
-    //     t2:true,
-    //     tc2:new URL(`./assets/lonlat.svg`, import.meta.url).href,
-    //     ta2:new URL(`./assets/lonlatselected.svg`, import.meta.url).href,
-    // })
-    // const props=reactive({
-    //
-    // })
-    // const props = defineProps({
-    //     lonlatmapselected: {
-    //         type:Boolean,
-    //         default:true
-    //     },
-    // });
+
 
 </script>
 

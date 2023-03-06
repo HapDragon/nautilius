@@ -5,15 +5,15 @@
             <span></span>
         </div>
         <div class="FontSize-14px">
-            <div class="color-white" style="width:130px;margin:16px auto 8px auto;height:32px;">
+            <div class="color-white" style="width:180px;margin:16px auto 8px auto;height:32px;">
                 <div class="float-left">Longitude:</div>
                 <div class="float-left margin-left12px">{{longitudestr}}</div>
             </div>
-            <div class="color-white" style="width:130px;margin:8px auto;height:32px;">
+            <div class="color-white" style="width:180px;margin:8px auto;height:32px;">
                 <div class="float-left">Latitude:</div>
                 <div class="float-left margin-left12px">{{latitudestr}}</div>
             </div>
-            <div class="color-white" style="width:130px;margin:8px auto;height:32px;position: relative;">
+            <div class="color-white" style="width:180px;margin:8px auto;height:32px;position: relative;">
                 <div class="float-left">Altitude:</div>
                 <div class="float-left margin-left12px">{{altitudestr}}</div>
 
@@ -32,6 +32,7 @@
 
 
     import cesiumUtil from '../../../../buss/cesiumviewer'
+    import {FormatLongitude,FormatLatitude} from "../../../../buss/cesiumviewer";
 
     export default {
         name: "GetLocation",
@@ -71,7 +72,8 @@
                 let miao = parseInt(abs * 3600 - du * 3600 - fen * 60);
                 return du + "°" + fen + "′" + miao + "″" + (this.lng >= 0 ? " E" : " W");*/
                 if(this.lng){
-                    return this.lng.toFixed(6);
+                    return FormatLongitude(Number(this.lng.toFixed(6)));
+                    //return this.lng.toFixed(6);
                 }
                 return '';
             },
@@ -79,12 +81,13 @@
                 /*let abs = Math.abs(this.lat);
                 return parseInt(abs * 100) / 100 + "° " + (this.lat >= 0 ? "N" : "S");*/
                 if(this.lat){
-                    return this.lat.toFixed(6);
+                    return FormatLatitude(Number(this.lat.toFixed(6)));
+                    //return this.lat.toFixed(6);
                 }
                 return '';
             },
             altitudestr() {
-                return parseInt(this.altitude * 100) / 100 + "米";
+                return parseInt(this.altitude * 100) / 100 + "m";
             }
         },
         methods: {
@@ -105,7 +108,7 @@
             copyText(){
                 let tag = document.createElement('input');
                 tag.setAttribute('id', 'cp_location_input');
-                tag.value = 'x:'+this.longitudestr+' y:'+this.latitudestr+' z:'+parseInt(this.altitude * 100) / 100;
+                tag.value = 'x:'+this.longitudestr+' y:'+this.latitudestr+' z:'+this.altitudestr;
                 document.getElementsByTagName('body')[0].appendChild(tag);
                 document.getElementById('cp_location_input').select();
                 document.execCommand('copy');
@@ -128,7 +131,7 @@
 
 <style scoped>
     .tag {
-        width: 180px;
+        width: 230px;
         height: 150px;
         left: 300px;
         top: 400px;
@@ -143,7 +146,7 @@
         width: 40px;
         height: 40px;
         bottom: -40px;
-        left: 100px;
+        left: 150px;
     }
 
     .arrow * {
