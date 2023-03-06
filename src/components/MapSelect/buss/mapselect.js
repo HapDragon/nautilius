@@ -335,7 +335,7 @@ export function ToggleOceanWaterShow(visible) {
                     rectangle: Cesium.Rectangle.fromDegrees(-180.0, -90.0, 180.0, 90.0),
                     vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT,
                     height: 0,
-                    extrudedHeight: 1,
+                    // extrudedHeight: 1,
                     // shadowVolume: true,
                 })
                 // geometry: Cesium.RectangleGeometry.createShadowVolume(new Cesium.RectangleGeometry({
